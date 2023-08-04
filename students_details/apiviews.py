@@ -4,7 +4,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework import status
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404
-from .models import Student
+from .models import Student, Course
 
 from students_details.services.commands import create_student, update_student, delete_student
 from students_details.services.queries import get_students
@@ -14,15 +14,16 @@ from students_details.services.queries import get_students
 class StudentApi(APIView):
     paginator = PageNumberPagination()
     class InputSerializer(serializers.ModelSerializer):
+        course_id= serializers.PrimaryKeyRelatedField(queryset= Course.objects.all())
         class Meta:
             model = Student
-            fields = ['name', 'age', 'course']
+            fields = ['name', 'age', 'course_id']
     class OutputSerializer(serializers.ModelSerializer):
         student_id = serializers.IntegerField(source="id")
 
         class Meta:
             model = Student
-            fields = ['student_id', 'name', 'age', 'course']
+            fields = ['student_id', 'name', 'age', 'course_id']
 
     def get(self, request, *args, **kwargs):
         if 'student_id' in self.kwargs:
@@ -42,14 +43,18 @@ class StudentApi(APIView):
     def post(self, request, *args, **kwargs):
         serializer = self.InputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        student = create_student(**serializer.validated_data)
+        course= serializer.validated_data.pop(
+            'course_id') if 'course_id' in serializer.validated_data else None
+        student = create_student(course=course, **serializer.validated_data)
         return Response(self.OutputSerializer(student).data, status=status.HTTP_201_CREATED)
     
     def put(self, request, student_id, *args, **kwargs):
         student = get_object_or_404(Student, id=student_id)
         serializer = self.InputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        student = update_student(student=student, **serializer.validated_data)
+        course= serializer.validated_data.pop(
+            'course_id') if 'course_id' in serializer.validated_data else None
+        student = update_student(student=student, course=course, **serializer.validated_data)
         return Response(self.OutputSerializer(student).data, status=status.HTTP_202_ACCEPTED)
     
     def delete(self, request, student_id, *args, **kwargs):
