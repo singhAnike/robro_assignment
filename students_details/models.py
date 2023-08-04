@@ -13,6 +13,8 @@ class Student(models.Model):
     name = models.CharField(max_length=200)
     age = models.IntegerField()
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    enrollment_date = models.DateField()
+
 
     def __str__(self):
         return self.name
