@@ -17,13 +17,13 @@ class StudentApi(APIView):
         course_id= serializers.PrimaryKeyRelatedField(queryset= Course.objects.all())
         class Meta:
             model = Student
-            fields = ['name', 'age', 'course_id']
+            fields = ['name', 'age', 'course_id', 'enrollment_date']
     class OutputSerializer(serializers.ModelSerializer):
         student_id = serializers.IntegerField(source="id")
 
         class Meta:
             model = Student
-            fields = ['student_id', 'name', 'age', 'course_id']
+            fields = ['student_id', 'name', 'age', 'course_id', 'enrollment_date']
 
     def get(self, request, *args, **kwargs):
         if 'student_id' in self.kwargs:

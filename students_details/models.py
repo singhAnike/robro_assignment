@@ -15,6 +15,5 @@ class Student(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     enrollment_date = models.DateField()
 
-
     def __str__(self):
         return self.name
